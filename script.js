@@ -1,13 +1,10 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 400;
-canvas.height = 600;
-
 // Game variables
 let bird = { x: 50, y: 300, size: 20, dy: 0 };
 let gravity = 0.4;
-let jump = -6; // 점프 크기 감소
+let jump = -6;
 
 let pipes = [];
 let pipeGap = 150; // 간격 넓힘
@@ -18,9 +15,22 @@ let score = 0;
 let isGameRunning = false;
 let isGameOver = false;
 
-// Create pipes
+// 캔버스 크기를 화면에 맞게 조정
+function resizeCanvas() {
+  const aspectRatio = 400 / 600; // 고정 비율
+  const width = window.innerWidth * 0.9; // 화면의 90% 너비
+  const height = width / aspectRatio; // 비율에 맞는 높이
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // 크기 변경 후 게임 오브젝트 재배치
+  bird = { ...bird, size: width / 20 }; // 새 크기 비례 조정
+}
+
+// Pipe 생성
 function createPipe() {
-  const height = Math.floor(Math.random() * 200) + 100; // Random height
+  const height = Math.floor(Math.random() * (canvas.height / 2)) + canvas.height / 4;
   pipes.push({
     x: canvas.width,
     y: 0,
@@ -92,7 +102,7 @@ function update() {
 
 // Reset game
 function resetGame() {
-  bird.y = 300;
+  bird.y = canvas.height / 2;
   bird.dy = 0;
   pipes = [];
   score = 0;
@@ -109,7 +119,7 @@ function endGame() {
 // Display score
 function displayScore() {
   ctx.fillStyle = "#000";
-  ctx.font = "20px Arial";
+  ctx.font = `${canvas.width / 20}px Arial`;
   ctx.fillText(`Score: ${score}`, 10, 30);
 }
 
@@ -120,13 +130,13 @@ function gameLoop() {
   if (!isGameRunning && !isGameOver) {
     // Show start message
     ctx.fillStyle = "#000";
-    ctx.font = "24px Arial";
+    ctx.font = `${canvas.width / 15}px Arial`;
     ctx.textAlign = "center";
     ctx.fillText("터치하면 시작합니다!", canvas.width / 2, canvas.height / 2);
   } else if (isGameOver) {
     // Show game over message
     ctx.fillStyle = "#000";
-    ctx.font = "24px Arial";
+    ctx.font = `${canvas.width / 15}px Arial`;
     ctx.textAlign = "center";
     ctx.fillText(`게임 종료! 점수: ${score}`, canvas.width / 2, canvas.height / 2);
     ctx.fillText("터치해서 다시 시작!", canvas.width / 2, canvas.height / 2 + 40);
@@ -151,5 +161,9 @@ canvas.addEventListener("click", () => {
   }
 });
 
+// 화면 크기 변경 시 캔버스 조정
+window.addEventListener("resize", resizeCanvas);
+
 // Start game loop
+resizeCanvas(); // 초기 화면 크기 설정
 gameLoop();
